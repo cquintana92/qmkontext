@@ -1,0 +1,16 @@
+[Unit]
+Description=QMKontext
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/qmkontext
+Environment="DISPLAY=:0"
+StandardOutput=journal
+StandardError=journal
+Type=simple
+Restart=always
+RestartSec=3
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

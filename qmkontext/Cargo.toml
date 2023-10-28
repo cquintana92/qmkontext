@@ -1,0 +1,13 @@
+[package]
+name = "qmkontext"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+doctest = false
+
+[dependencies]
+chrono = "0.4.31"
+crossbeam-channel = "0.5.8"
+hidapi = "2.4.1"
+tracing = "0.1.39"

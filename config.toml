@@ -1,0 +1,56 @@
+# Log level of the application.
+# Must be one of:
+# - trace
+# - debug
+# - info
+# - warn
+# - error
+log_level = "info"
+
+# Config of the keyboard.
+# In order to know the values for your keyboard, you can run `qmkontext-cli list`.
+[keyboard]
+# Vendor id of the program.
+vendor_id = 1234
+# Product of the program.
+product_id = 5678
+# Usage of the HID interface. Defaults to 0xFF60 (65376)
+usage = 65376
+# Usage page of the HID interface. Defaults to 0x61 (97)
+usage_page = 97
+
+# Current program configuration.
+[current_program]
+# Enable the current program detector.
+enable = true
+# Interval in seconds for retrieving the current program.
+interval_seconds = 2
+# Byte that will be sent as the offset 0 for the custom command.
+command_id = 1
+# Default value when no mapping is found.
+default_value = 0
+# Set to true if you want to convert the current program window name and binary to lowercase. Defaults to true.
+use_lowercase = true
+
+# Examples for custom mappings
+[[current_program.mappings]]
+key = "alacritty"
+value = 1
+
+[[current_program.mappings]]
+key = "chrome"
+value = 2
+
+[[current_program.mappings]]
+key = "firefox"
+value = 3
+
+# Configuration for the custom commands
+[[custom_commands]]
+# Script to be run. Its output written to stdout must be a number between 0 and 255.
+command = "cat /dev/null | wc -l"
+# Byte that will be sent as the offset 0 for the custom command
+command_id = 2
+# Interval in seconds for running the command.
+interval_seconds = 3
+

@@ -1,0 +1,16 @@
+[package]
+name = "qmkontext-cli"
+version = "0.1.0"
+edition = "2021"
+authors = [ "Carlos Quintana <carlos@cquintana.dev>"]
+
+[dependencies]
+qmkontext = { path = "../qmkontext" }
+
+clap = { version = "4.4.7", features = ["derive"] }
+config = "0.10.1"
+dotenv = "0.15.0"
+serde = { version = "1.0.190", features = ["derive"] }
+tracing = "0.1.39"
+tracing-log = { version = "0.1", features = ["env_logger"] }
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }

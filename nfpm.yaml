@@ -1,0 +1,26 @@
+name: qmkontext
+arch: amd64
+platform: linux
+version: 0.1.0
+version_schema: semver
+maintainer: Carlos Quintana <carlos@cquintana.dev>
+description: Tool send your current computer context to your QMK keyboard.
+homepage: https://github.com/cquintana92/qmkontext
+license: MIT
+
+depends:
+  - xdotool
+
+contents:
+  - src: target/release/qmkontext-cli
+    dst: /usr/bin/qmkontext
+
+  - src: pkg/qmkontext.service
+    dst: /etc/systemd/system/qmkontext.service
+
+  - src: config.toml
+    dst: /etc/qmkontext/config.toml
+    type: config|noreplace
+
+scripts:
+  postinstall: ./pkg/reload.sh

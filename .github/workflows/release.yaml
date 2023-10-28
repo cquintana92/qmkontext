@@ -1,0 +1,104 @@
+name: release
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  create-release:
+    name: create-release
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Create artifacts directory
+        run: mkdir artifacts
+
+      - name: Get the release version from the tag
+        if: env.BIN_VERSION == ''
+        run: |
+          echo "BIN_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "version is: ${{ env.BIN_VERSION }}"
+
+      - name: Create GitHub release
+        id: release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.BIN_VERSION }}
+          release_name: ${{ env.BIN_VERSION }}
+
+      - name: Save release upload URL to artifact
+        run: echo "${{ steps.release.outputs.upload_url }}" > artifacts/release-upload-url
+
+      - name: Save version number to artifact
+        run: echo "${{ env.BIN_VERSION }}" > artifacts/release-version
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifacts
+          path: artifacts
+
+  build-release:
+    name: build-release
+    needs: ['create-release']
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Get release download URL
+        uses: actions/download-artifact@v1
+        with:
+          name: artifacts
+          path: artifacts
+
+      - name: Set release upload URL and release version
+        shell: bash
+        run: |
+          release_upload_url="$(cat artifacts/release-upload-url)"
+          echo "RELEASE_UPLOAD_URL=$release_upload_url" >> $GITHUB_ENV
+          echo "release upload url: $RELEASE_UPLOAD_URL"
+          release_version="$(cat artifacts/release-version)"
+          echo "RELEASE_VERSION=$release_version" >> $GITHUB_ENV
+          echo "release version: $RELEASE_VERSION"
+
+      - name: Install dependencies
+        run: sudo apt update && sudo apt install -y libudev-dev wget
+
+      - name: Install packager
+        run: |
+          filename="nfpm_2.34.0_amd64.deb"
+          wget "https://github.com/goreleaser/nfpm/releases/download/v2.34.0/${filename}"
+          echo "7b2574318401481237447628567f262210b55c9904e0620a397d71cac9ff7fb3  ${filename}" | sha256sum -c
+          sudo apt install -y "./${filename}"
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Build archive
+        shell: bash
+        run: |
+          nfpm package -p deb
+          deb_name="qmkontext_${{ env.RELEASE_VERSION }}_amd64.deb"
+          echo "Built deb ${deb_name}"
+          echo "ASSET=${deb_name}" >> $GITHUB_ENV
+
+      - name: Upload release archive
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.RELEASE_UPLOAD_URL }}
+          asset_path: ${{ env.ASSET }}
+          asset_name: ${{ env.ASSET }}
+          asset_content_type: application/octet-stream
