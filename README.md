@@ -37,6 +37,10 @@ When you install the `.deb` package, it will place a sample config file in `/etc
 The first thing you will need to do is to fill your `[keyboard]` section of the config file. In order to help you with that, you can run `qmkontext list`, and that will list your available devices, with the `vendor_id` and `product_id`.
 It will also print the `usage` and `usage_page`, which you will need in case they differ from the defaults.
 
+QMKontext allows you, by default, to detect the currently focused program by configuring the `[[current_program.mappings]]` array, by setting the `key` to a string that can be found on either the program binary or the window name, and the `value` to whatever value you want to send to QMK.
+
+It also allows you to run arbitrary commands (aka: custom bash scripts or one-liners) and send the result to QMK in the same fashion. You can add as many as you want as seen in the `[[custom_commands]]` array. The `command` can either be a `bash` one-line command or a path to a bash script. The output of the command/script must be a single number between 0 and 255, as it will be sent as the payload to the QMK keyboard.
+
 For testing the config file without starting it in background, you can just run `qmkontext`. If you want to debug what it's detecting, feel free to change the `log_level` property on the config file. You can also pass `--config PATH_TO_FILE` if you want to test a different config file.
 
 Once you are comfortable with the config file, make sure to place it in `/etc/qmkontext/config.toml` and configure the systemd service.
