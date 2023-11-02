@@ -12,6 +12,8 @@ use qmkontext::{
 };
 use std::collections::HashMap;
 
+const RETRY_DELAY_SECONDS: u64 = 10;
+
 #[derive(Parser)]
 #[command(name = "QMKontext")]
 #[command(author, version)]
@@ -74,13 +76,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         engine.start().expect("Error in loop");
     } else {
         let keyboard = config.keyboard;
-        let sink = HidEventSink::new(
-            keyboard.vendor_id,
-            keyboard.product_id,
-            keyboard.usage,
-            keyboard.usage_page,
-        )
-        .expect("Error initializing HID");
+        let sink = loop {
+            match HidEventSink::new(
+                keyboard.vendor_id,
+                keyboard.product_id,
+                keyboard.usage,
+                keyboard.usage_page,
+            ) {
+                Ok(c) => break c,
+                Err(e) => {
+                    error!("Cannot connect to device: {:?}", e);
+                    std::thread::sleep(std::time::Duration::from_secs(RETRY_DELAY_SECONDS));
+                    continue;
+                }
+            }
+        };
         let engine = Engine::new(source, sink);
         engine.start().expect("Error in loop")
     };
