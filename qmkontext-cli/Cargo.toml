@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 authors = [ "Carlos Quintana <carlos@cquintana.dev>"]
 
+[package.metadata.release]
+pre-release-replacements = [
+    {file="../nfpm.yaml", search="version: .*", replace="version: {{version}}"}
+]
+
 [dependencies]
 qmkontext = { path = "../qmkontext" }
 
