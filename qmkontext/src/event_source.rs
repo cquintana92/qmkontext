@@ -117,6 +117,7 @@ impl UserEventSource {
                     "Found program name in name (program_name={})",
                     transformed_program_name
                 );
+                info!("Found program {program_name}");
                 let event = Event::Send {
                     command_id: source.command_id,
                     command_data: *command_data,
@@ -130,6 +131,7 @@ impl UserEventSource {
                     "Found program name in binary (program_name={})",
                     transformed_program_name
                 );
+                info!("Found program {program_name}");
                 let event = Event::Send {
                     command_id: source.command_id,
                     command_data: *command_data,
