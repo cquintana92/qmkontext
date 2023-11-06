@@ -448,7 +448,7 @@ dependencies = [
 
 [[package]]
 name = "qmkontext"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "chrono",
  "crossbeam-channel",
@@ -458,7 +458,7 @@ dependencies = [
 
 [[package]]
 name = "qmkontext-cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap",
  "config",
