@@ -1,4 +1,4 @@
-#include "qmkontext.h"
+#include "/usr/share/qmkontext/qmkontext.h"
 
 bool qmkontext_unhandled(uint8_t data) {
     return false;
