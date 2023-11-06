@@ -12,15 +12,24 @@ depends:
   - xdotool
 
 contents:
+  # Binary
   - src: target/release/qmkontext-cli
     dst: /usr/bin/qmkontext
 
-  - src: pkg/qmkontext.service
-    dst: /etc/systemd/system/qmkontext.service
-
+  # Config file
   - src: config.toml
     dst: /etc/qmkontext/config.toml
     type: config|noreplace
 
+  # Service
+  - src: pkg/qmkontext.service
+    dst: /usr/share/qmkontext/qmkontext.service
+
+  # QMK files
+  - src: qmk/qmkontext.h
+    dst: /usr/share/qmkontext/qmkontext.h
+  - src: qmk/qmkontext.c
+    dst: /usr/share/qmkontext/qmkontext.c
+
 scripts:
-  postinstall: ./pkg/reload.sh
+  postinstall: ./pkg/post-install.sh

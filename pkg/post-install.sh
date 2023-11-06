@@ -12,6 +12,7 @@ if [ "$EUID" -eq 0 ]; then
   if [ ! -f "${SERVICE_PATH}" ]; then
     cp "${SERVICE_INSTALL_PATH}" "${SERVICE_PATH}"
     systemctl daemon-reload
+    echo "Reloaded system services"
   else
     echo "Service already existed, not replacing"
   fi
@@ -21,10 +22,11 @@ else
     exit 0
   else
     if [ ! -f "${SERVICE_PATH}" ]; then
-        sudo cp "${SERVICE_INSTALL_PATH}" "${SERVICE_PATH}"
-        sudo systemctl daemon-reload
-      else
-        echo "Service already existed, not replacing"
-      fi
+      sudo cp "${SERVICE_INSTALL_PATH}" "${SERVICE_PATH}"
+      sudo systemctl daemon-reload
+      echo "Reloaded system services"
+    else
+      echo "Service already existed, not replacing"
+    fi
   fi
 fi
