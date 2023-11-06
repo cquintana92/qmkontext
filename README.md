@@ -80,36 +80,67 @@ A simple example is sending the current program. The buffer sent to the keyboard
 
 ## QMK setup
 
+In this section you will see how to add support for QMKontext on your keyboard.
+
+### Enable RAW HID handling and dependency
+
 In order for this to work on your QMK keyboard, make sure to add the following to your `rules.mk` file:
 
 ```
 RAW_ENABLE = yes
+SRC += /usr/share/qmkontext/qmkontext.c
 ```
 
-After that, you can add a section like this in your `keymap.c` file:
+And also make sure to add this section at the top of your `keymap.c` file:
 
 ```c
-// HID
+#include "/usr/share/qmkontext/qmkontext.h"
+```
+
+### Initializing
+
+Then, you will need to call the `qmkontext_init` method in your `keyboard_post_init_user` method and also forward the `raw_hid_receive` event:
+
+```c
+void keyboard_post_init_user(void) {
+    qmkontext_init();
+}
+
+void raw_hid_receive(uint8_t* data, uint8_t length) {
+    if (qmkontext_on_receive(data, length)) return;
+}
+```
+
+After that, you are ready to start registering callbacks.
+
+As an example, for the current program change, you can add a section like this in your `keymap.c` file:
+
+```c
 #define COMMAND_CURRENT_PROGRAM 1
 #define CURRENT_PROGRAM_DEFAULT 0
 #define CURRENT_PROGRAM_CHROME 1
 #define CURRENT_PROGRAM_FIREFOX 2
 #define CURRENT_PROGRAM_PYCHARM 3
 
+// Variable to keep track of the current program
 uint8_t current_program = CURRENT_PROGRAM_DEFAULT;
 
-void raw_hid_receive(uint8_t *data, uint8_t length) {
-    uint8_t command = data[0];
-    uint8_t payload = data[1];
-    switch (command) {
-        case COMMAND_CURRENT_PROGRAM:
-            current_program = payload;
-            break;
-    }
+bool on_current_program_change (uint8_t new_current_program) {
+    current_program = new_current_program;
+    return true; // Return true to mark the event as processed
+} 
+```
+
+And then register the callback in your `keyboard_post_init_user` like the following:
+
+```c
+void keyboard_post_init_user(void) {
+    qmkontext_init();
+    qmkontext_register_callback(COMMAND_CURRENT_PROGRAM, on_current_program_change);
 }
 ```
 
-And later, in your QMK code, you can check the current program by checking the `current_program` variable.
+And later, in your QMK code, you can check the current program by checking the global `current_program` variable.
 
 ## Troubleshooting
 
@@ -134,4 +165,4 @@ User=YOUR_USERNAME_HERE
 
 In case that doesn't fix it, try replacing the `DISPLAY` variable of the systemd service.
 
-Also, in case you want to see what program it's detecting, set the `log_level` directive to `debug` and it will print the detections it's making. Also, make sure that you are matching the casing and the `use_loweracase` flag of your config. 
+Also, in case you want to see what program it's detecting, set the `log_level` directive to `debug` and it will print the detections it's making. Also, make sure that you are matching the casing and the `use_lowercase` flag of your config. 

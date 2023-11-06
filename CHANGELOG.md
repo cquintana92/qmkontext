@@ -8,6 +8,16 @@
 ### Other 
 -->
 
+## 0.1.2
+
+### Features :tada:
+
+- Add `qmkontext.c` and `qmkontext.h` for easy integration on QMK files. 
+
+### Fixes :bug:
+
+- Do not overwrite service on `deb` reinstall / update.
+
 ## 0.1.1
 
 ### Fixes :bug:
