@@ -38,7 +38,10 @@ fn get_sink(keyboards: &[KeyboardConfig]) -> Option<HidEventSink> {
             keyboard.usage,
             keyboard.usage_page,
         ) {
-            Ok(c) => return Some(c),
+            Ok(c) => {
+                info!("Connected to device: vendorid={} productid={}", keyboard.vendor_id, keyboard.product_id);
+                return Some(c)
+            },
             Err(e) => {
                 error!("Cannot connect to device: {:?}", e);
             }
