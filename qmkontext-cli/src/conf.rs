@@ -66,7 +66,10 @@ pub struct Config {
     pub log_level: String,
     #[serde(default = "default_debug_mode")]
     pub debug_mode: bool,
-    pub keyboard: KeyboardConfig,
+    #[serde(default)]
+    pub keyboard: Option<KeyboardConfig>,
+    #[serde(default)]
+    pub keyboards: Vec<KeyboardConfig>,
     pub current_program: CurrentProgramConfig,
     #[serde(default)]
     pub custom_commands: Vec<CustomCommandConfig>,

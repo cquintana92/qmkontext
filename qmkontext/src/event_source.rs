@@ -21,12 +21,14 @@ pub enum UserEventSourceKind {
     },
 }
 
+#[derive(Clone)]
 pub struct UserEventConfig {
     pub interval: Duration,
     pub kind: UserEventSourceKind,
     pub command_id: u8,
 }
 
+#[derive(Clone)]
 pub struct UserEventSource {
     sources: Vec<UserEventConfig>,
     sender: Sender<Event>,

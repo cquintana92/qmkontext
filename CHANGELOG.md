@@ -8,6 +8,12 @@
 ### Other 
 -->
 
+## 0.2.0
+
+### Features :tada:
+
+- Allow to include many keyboards.
+
 ## 0.1.3
 
 ### Fixes :bug:

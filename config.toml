@@ -9,6 +9,7 @@ log_level = "info"
 
 # Config of the keyboard.
 # In order to know the values for your keyboard, you can run `qmkontext-cli list`.
+# Can also be defined as a list of [[keyboards]]. The first one found will be used
 [keyboard]
 # Vendor id of the program.
 vendor_id = 1234

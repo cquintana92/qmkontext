@@ -5,6 +5,7 @@ mod conf;
 mod list;
 mod utils;
 
+use crate::conf::{Config, KeyboardConfig};
 use clap::{Parser, Subcommand};
 use qmkontext::{
     chrono::Duration, CliSink, Engine, HidEventSink, UserEventConfig, UserEventSource,
@@ -29,9 +30,63 @@ enum Subcommands {
     List,
 }
 
+fn get_sink(keyboards: &[KeyboardConfig]) -> Option<HidEventSink> {
+    for keyboard in keyboards.iter() {
+        match HidEventSink::new(
+            keyboard.vendor_id,
+            keyboard.product_id,
+            keyboard.usage,
+            keyboard.usage_page,
+        ) {
+            Ok(c) => return Some(c),
+            Err(e) => {
+                error!("Cannot connect to device: {:?}", e);
+            }
+        };
+    }
+
+    None
+}
+
+fn start(
+    source: UserEventSource,
+    keyboard: Option<KeyboardConfig>,
+    keyboards: Vec<KeyboardConfig>,
+) {
+    let mut configured_keyboards = Vec::new();
+    if let Some(k) = keyboard {
+        configured_keyboards.push(k);
+    } else {
+        for keyboard in keyboards {
+            configured_keyboards.push(keyboard);
+        }
+    }
+
+    if configured_keyboards.is_empty() {
+        panic!("There are no configured keyboards. Please check your config");
+    }
+
+    loop {
+        let sink = get_sink(&configured_keyboards);
+        match sink {
+            Some(s) => {
+                let engine = Engine::new(source.clone(), s);
+                if let Err(e) = engine.start() {
+                    warn!("Error in engine: {:?}", e);
+                }
+            }
+            None => {
+                info!("Cannot connect to any keyboard");
+                std::thread::sleep(std::time::Duration::from_secs(RETRY_DELAY_SECONDS));
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_secs(RETRY_DELAY_SECONDS))
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let config = conf::Config::new(args.config).expect("Error reading config");
+    let config = Config::new(args.config).expect("Error reading config");
 
     utils::setup_logging(&config.log_level);
 
@@ -75,24 +130,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let engine = Engine::new(source, CliSink);
         engine.start().expect("Error in loop");
     } else {
-        let keyboard = config.keyboard;
-        let sink = loop {
-            match HidEventSink::new(
-                keyboard.vendor_id,
-                keyboard.product_id,
-                keyboard.usage,
-                keyboard.usage_page,
-            ) {
-                Ok(c) => break c,
-                Err(e) => {
-                    error!("Cannot connect to device: {:?}", e);
-                    std::thread::sleep(std::time::Duration::from_secs(RETRY_DELAY_SECONDS));
-                    continue;
-                }
-            }
-        };
-        let engine = Engine::new(source, sink);
-        engine.start().expect("Error in loop")
+        start(source, config.keyboard, config.keyboards);
     };
 
     Ok(())
